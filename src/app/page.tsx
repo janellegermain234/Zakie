@@ -16,11 +16,16 @@ function formatDate(value: string): string {
 function ProfileCard({ row }: { row: BusinessProfileRow }) {
   const { profile } = row;
   return (
-    <li className="rounded-xl border border-border bg-surface transition-colors hover:border-muted/40">
-      <Link href={`/profiles/${row.id}`} className="block p-6">
+    <li className="flex flex-col rounded-xl border border-border bg-surface transition-colors hover:border-muted/40">
+      <div className="flex-1 p-6">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h3 className="text-lg font-medium tracking-tight">
-            {displayName(profile)}
+            <Link
+              href={`/profiles/${row.id}`}
+              className="transition-colors hover:text-accent"
+            >
+              {displayName(profile)}
+            </Link>
           </h3>
           <span className="text-xs text-muted">v{row.version}</span>
         </div>
@@ -52,7 +57,21 @@ function ProfileCard({ row }: { row: BusinessProfileRow }) {
         <p className="mt-5 text-xs text-muted">
           Updated {formatDate(row.updated_at)}
         </p>
-      </Link>
+      </div>
+      <div className="flex items-center justify-between gap-4 border-t border-border px-6 py-4">
+        <Link
+          href={`/profiles/${row.id}`}
+          className="text-sm text-muted transition-colors hover:text-foreground"
+        >
+          Edit profile
+        </Link>
+        <Link
+          href={`/profiles/${row.id}/generate`}
+          className="text-sm font-medium text-accent transition-opacity hover:opacity-80"
+        >
+          Generate →
+        </Link>
+      </div>
     </li>
   );
 }

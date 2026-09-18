@@ -35,61 +35,53 @@ export const PERSONALITY_MAX = 5;
 /**
  * Preset options for the four composite fields.
  *
- * These are the demo's defaults and are meant to be edited: replacing a list
- * here changes the pickers everywhere. A saved selection that is no longer in
- * its list is kept and still shown, so editing a list never loses data.
+ * Replacing a list here changes the pickers everywhere. A saved selection that
+ * is no longer in its list is kept and still shown, so editing a list never
+ * loses data.
  */
 
 export const PRICING_MODELS = [
-  "one-off purchase",
-  "subscription",
-  "retainer",
-  "hourly rate",
-  "day rate",
-  "project fee",
-  "tiered packages",
-  "freemium",
-  "commission or revenue share",
-  "free",
+  "One-off, priced per job",
+  "Fixed package prices",
+  "Monthly subscription",
+  "Annual subscription",
+  "Hourly rate",
+  "Mix of one-off and subscription",
 ] as const;
 
 export const TONE_RULES = [
-  "short sentences",
-  "plain English, no jargon",
-  "active voice",
-  "speak as you, not we",
-  "no exclamation marks",
-  "no hype or superlatives",
-  "no emoji",
-  "contractions are fine",
-  "dry humour welcome",
-  "British spelling",
+  "Plain and direct, no jargon",
+  "Warm and conversational",
+  "Short sentences",
+  "No hype or exclamation marks",
+  "No discount or urgency language",
+  "Talk about money and time saved",
+  "Never make the reader feel behind",
+  "Formal and professional",
+  "Light humour",
+  "No technical terms",
 ] as const;
 
 export const INSPIRATIONS = [
-  "editorial and magazine",
-  "independent retail",
-  "premium beauty and skincare",
-  "modern software brands",
-  "craft food and drink",
-  "heritage and traditional trades",
-  "outdoor and adventure",
-  "wellness and calm",
-  "streetwear and youth culture",
-  "luxury hospitality",
+  "Clean and minimal",
+  "Bold and high contrast",
+  "Warm and handmade",
+  "Premium and understated",
+  "Bright and playful",
+  "Technical and precise",
+  "Natural and organic",
+  "Retro",
 ] as const;
 
 export const THINGS_TO_AVOID = [
-  "jargon and buzzwords",
-  "hype and superlatives",
-  "clichés (artisan, game-changing, passionate)",
-  "exclamation marks",
-  "emoji",
-  "ALL CAPS",
-  "slang",
-  "discounting and price claims",
-  "competitor names",
-  "guarantees and medical claims",
+  "Discount-led messaging",
+  "Hype and superlatives",
+  "Industry jargon",
+  "Emojis",
+  "Claims we cannot prove",
+  "Naming competitors",
+  "Slang",
+  "Long paragraphs",
 ] as const;
 
 /** A preset picker plus its optional free text, stored under one key. */
