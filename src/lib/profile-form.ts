@@ -5,9 +5,10 @@ import {
   PERSONALITY_TRAITS,
   PROFILE_FIELDS,
   STAGES,
+  isCompositeField,
   type BusinessProfile,
+  type CompositeValue,
   type PersonalityTrait,
-  type Stage,
 } from "@/lib/profile";
 
 export type FieldErrors = Partial<Record<keyof BusinessProfile, string>>;
@@ -27,12 +28,44 @@ export const INITIAL_SAVE_STATE: SaveState = {
   values: null,
 };
 
+/** Form field names for a composite field's two inputs. */
+export function selectedInputName(field: string): string {
+  return `${field}__selected`;
+}
+
+export function notesInputName(field: string): string {
+  return `${field}__notes`;
+}
+
+function readComposite(
+  formData: FormData,
+  field: string,
+  single: boolean,
+): CompositeValue {
+  const selected = formData
+    .getAll(selectedInputName(field))
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+  const notes = formData.get(notesInputName(field));
+
+  return {
+    selected: single ? selected.slice(0, 1) : selected,
+    notes: typeof notes === "string" ? notes.trim() : "",
+  };
+}
+
 /** Read the fourteen fields out of FormData. Shape only — no validation. */
 export function readProfileForm(formData: FormData): BusinessProfile {
   const profile: BusinessProfile = { ...EMPTY_PROFILE };
 
   for (const field of PROFILE_FIELDS) {
-    if (field.name === "personality") {
+    if (isCompositeField(field.name)) {
+      profile[field.name] = readComposite(
+        formData,
+        field.name,
+        field.kind === "preset-single",
+      );
+    } else if (field.name === "personality") {
       profile.personality = formData
         .getAll("personality")
         .map((value) => String(value))
@@ -68,9 +101,7 @@ export function validateProfile(profile: BusinessProfile): FieldErrors {
     errors.personality = `Choose between ${PERSONALITY_MIN} and ${PERSONALITY_MAX} traits.`;
   }
 
-  return errors;
-}
+  // The preset pickers have no minimum: an empty one is a valid answer.
 
-export function asStage(value: string): Stage | "" {
-  return (STAGES as readonly string[]).includes(value) ? (value as Stage) : "";
+  return errors;
 }
