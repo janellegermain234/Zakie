@@ -6,13 +6,17 @@ import { useActionState, useState } from "react";
 import { saveProfile } from "@/app/profiles/actions";
 import {
   INITIAL_SAVE_STATE,
+  notesInputName,
+  selectedInputName,
   type SaveState,
 } from "@/lib/profile-form";
 import {
   PERSONALITY_MAX,
   PERSONALITY_MIN,
   PROFILE_SECTIONS,
+  isCompositeField,
   type BusinessProfile,
+  type CompositeValue,
   type ProfileField,
 } from "@/lib/profile";
 
@@ -22,16 +26,18 @@ const inputClass =
 function FieldShell({
   field,
   error,
+  htmlFor,
   children,
 }: {
   field: ProfileField;
   error?: string;
+  htmlFor?: string;
   children: React.ReactNode;
 }) {
   return (
     <div>
       <div className="flex items-baseline justify-between gap-4">
-        <label htmlFor={field.name} className="text-sm font-medium">
+        <label htmlFor={htmlFor ?? field.name} className="text-sm font-medium">
           {field.label}
           {field.required ? <span className="ml-1 text-accent">*</span> : null}
         </label>
@@ -45,6 +51,70 @@ function FieldShell({
   );
 }
 
+/**
+ * Preset pills backed by checkboxes. Options and any saved-but-unlisted
+ * selection are both shown, so editing an option list never hides a value that
+ * is already stored.
+ */
+function PillGroup({
+  name,
+  options,
+  initial,
+  single = false,
+  onChange,
+}: {
+  name: string;
+  options: readonly string[];
+  initial: string[];
+  single?: boolean;
+  onChange?: (selected: string[]) => void;
+}) {
+  const [selected, setSelected] = useState<string[]>(initial);
+  const pills = [
+    ...options,
+    ...initial.filter((value) => !options.includes(value)),
+  ];
+
+  function toggle(option: string) {
+    const next = selected.includes(option)
+      ? selected.filter((value) => value !== option)
+      : single
+        ? [option]
+        : [...selected, option];
+
+    setSelected(next);
+    onChange?.(next);
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {pills.map((option) => {
+        const isSelected = selected.includes(option);
+        return (
+          <label
+            key={option}
+            className={`cursor-pointer rounded-full border px-4 py-2 text-sm transition-colors ${
+              isSelected
+                ? "border-accent bg-accent-soft text-foreground"
+                : "border-border bg-surface-raised text-muted hover:border-muted/40 hover:text-foreground"
+            }`}
+          >
+            <input
+              type="checkbox"
+              name={name}
+              value={option}
+              checked={isSelected}
+              onChange={() => toggle(option)}
+              className="sr-only"
+            />
+            {option}
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
 function PersonalityPicker({
   field,
   initial,
@@ -52,55 +122,59 @@ function PersonalityPicker({
   field: ProfileField;
   initial: string[];
 }) {
-  const [selected, setSelected] = useState<string[]>(initial);
+  const [count, setCount] = useState(initial.length);
 
-  function toggle(trait: string) {
-    setSelected((current) =>
-      current.includes(trait)
-        ? current.filter((value) => value !== trait)
-        : [...current, trait],
-    );
-  }
-
-  // Untouched counts stay neutral; the server's message is what flags a
-  // rejected submission.
+  // Untouched counts stay neutral; the server's message flags a rejected save.
   const looksWrong =
-    selected.length > 0 &&
-    (selected.length < PERSONALITY_MIN || selected.length > PERSONALITY_MAX);
+    count > 0 && (count < PERSONALITY_MIN || count > PERSONALITY_MAX);
 
   return (
     <div>
-      <div className="flex flex-wrap gap-2">
-        {field.options?.map((trait) => {
-          const isSelected = selected.includes(trait);
-          return (
-            <label
-              key={trait}
-              className={`cursor-pointer rounded-full border px-4 py-2 text-sm transition-colors ${
-                isSelected
-                  ? "border-accent bg-accent-soft text-foreground"
-                  : "border-border bg-surface-raised text-muted hover:border-muted/40 hover:text-foreground"
-              }`}
-            >
-              <input
-                type="checkbox"
-                name={field.name}
-                value={trait}
-                checked={isSelected}
-                onChange={() => toggle(trait)}
-                className="sr-only"
-              />
-              {trait}
-            </label>
-          );
-        })}
-      </div>
-      <p
-        className={`mt-2 text-xs ${looksWrong ? "text-negative" : "text-muted"}`}
-      >
-        {selected.length} selected — {PERSONALITY_MIN} to {PERSONALITY_MAX}{" "}
-        required.
+      <PillGroup
+        name={field.name}
+        options={field.options ?? []}
+        initial={initial}
+        onChange={(next) => setCount(next.length)}
+      />
+      <p className={`mt-2 text-xs ${looksWrong ? "text-negative" : "text-muted"}`}>
+        {count} selected — {PERSONALITY_MIN} to {PERSONALITY_MAX} required.
       </p>
+    </div>
+  );
+}
+
+/** A preset picker plus the optional free-text box stored alongside it. */
+function CompositeField({
+  field,
+  value,
+}: {
+  field: ProfileField;
+  value: CompositeValue;
+}) {
+  const notesId = notesInputName(field.name);
+
+  return (
+    <div>
+      <PillGroup
+        name={selectedInputName(field.name)}
+        options={field.options ?? []}
+        initial={value.selected}
+        single={field.kind === "preset-single"}
+      />
+      <div className="mt-4">
+        <label htmlFor={notesId} className="text-xs text-muted">
+          {field.notesLabel ?? "Anything else"}
+          <span className="ml-1 opacity-70">(optional)</span>
+        </label>
+        <textarea
+          id={notesId}
+          name={notesId}
+          rows={2}
+          defaultValue={value.notes}
+          placeholder={field.notesPlaceholder}
+          className={`${inputClass} mt-2 resize-y leading-relaxed`}
+        />
+      </div>
     </div>
   );
 }
@@ -114,6 +188,18 @@ function Field({
   profile: BusinessProfile;
   error?: string;
 }) {
+  if (isCompositeField(field.name)) {
+    return (
+      <FieldShell
+        field={field}
+        error={error}
+        htmlFor={notesInputName(field.name)}
+      >
+        <CompositeField field={field} value={profile[field.name]} />
+      </FieldShell>
+    );
+  }
+
   if (field.kind === "multiselect") {
     return (
       <FieldShell field={field} error={error}>
