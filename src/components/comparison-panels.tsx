@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { FormattedText } from "@/components/formatted-text";
+import { GeneratedOutput } from "@/components/generated-output";
 import type { GenerationSource } from "@/lib/crisp";
 
 /**
@@ -30,12 +30,14 @@ function Panel({
   requestNote,
   state,
   accent,
+  businessName,
 }: {
   label: string;
   description: string;
   requestNote: React.ReactNode;
   state: PanelState;
   accent: boolean;
+  businessName: string;
 }) {
   return (
     <section
@@ -70,7 +72,7 @@ function Panel({
         ) : state.error ? (
           <p className="text-sm text-negative">{state.error}</p>
         ) : state.text ? (
-          <FormattedText text={state.text} />
+          <GeneratedOutput text={state.text} businessName={businessName} />
         ) : (
           <p className="text-sm text-muted">
             Nothing yet. Generate both to compare.
@@ -83,12 +85,14 @@ function Panel({
 
 export function ComparisonPanels({
   profileId,
+  businessName,
   naivePrompt,
   model,
   profileVersion,
   contextFieldCount,
 }: {
   profileId: string;
+  businessName: string;
   naivePrompt: string;
   model: string;
   profileVersion: number;
@@ -163,6 +167,7 @@ export function ComparisonPanels({
       <div className="mt-8 grid items-start gap-6 lg:grid-cols-2">
         <Panel
           accent
+          businessName={businessName}
           label="With the business profile"
           description="The CRISP request: the stored profile as structured context, a role, the instruction, the fixed design standards, and the output parameters."
           state={panels.profile}
@@ -175,6 +180,7 @@ export function ComparisonPanels({
         />
         <Panel
           accent={false}
+          businessName={businessName}
           label="From a blank prompt"
           description="What someone types when they have nothing stored: the business name and the ask."
           state={panels.blank}

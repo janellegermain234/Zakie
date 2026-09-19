@@ -49,7 +49,10 @@ export default async function GeneratePage({
       </div>
 
       <div className="mt-10">
-        <GeneratePanel profileId={row.id} />
+        <GeneratePanel
+          profileId={row.id}
+          businessName={displayName(row.profile)}
+        />
       </div>
 
       <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-8">

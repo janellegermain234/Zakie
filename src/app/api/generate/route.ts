@@ -6,6 +6,7 @@ import {
   crispToPrompt,
   type GenerationSource,
 } from "@/lib/crisp";
+import { BRAND_SYSTEM_SCHEMA } from "@/lib/brand-system";
 import { generateText } from "@/lib/openai";
 import { getProfile } from "@/lib/profiles-repo";
 
@@ -54,18 +55,28 @@ export async function POST(request: Request) {
 
   const generationSource: GenerationSource = source;
 
-  // The blank side gets no role and no context — a person typing a one-line
-  // prompt writes neither.
-  const { prompt, instructions } =
+  // The blank side gets no role, no context and no schema — a person typing a
+  // one-line prompt writes none of them.
+  const call =
     generationSource === "profile"
       ? (() => {
           const crisp = buildCrispRequest(row.profile);
-          return { prompt: crispToPrompt(crisp), instructions: crisp.role };
+          return {
+            prompt: crispToPrompt(crisp),
+            options: {
+              instructions: crisp.role,
+              schema: {
+                name: "brand_system",
+                schema: BRAND_SYSTEM_SCHEMA as unknown as Record<string, unknown>,
+              },
+            },
+          };
         })()
-      : { prompt: buildNaivePrompt(row.profile), instructions: undefined };
+      : { prompt: buildNaivePrompt(row.profile), options: {} };
 
   try {
-    const result = await generateText(prompt, instructions);
+    // Stored exactly as it comes back — no reshaping on the way in.
+    const result = await generateText(call.prompt, call.options);
 
     const assetId = await saveAsset({
       businessId: row.id,

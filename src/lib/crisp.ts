@@ -32,11 +32,18 @@ const INSTRUCTION =
   "Produce brand guidelines for this business: how it sounds, how it looks, and how those two hold together across everything it publishes. Ground every recommendation in the business described in the context — name the customer, the offer and the constraints rather than writing advice that would suit any business.";
 
 const PARAMETERS = [
-  "Format: Markdown. Use these six sections, in this order, each as a `## ` heading: Brand at a glance, Voice and tone, Messaging and copy, Typography and hierarchy, Colour and spacing, Logo and layout. Under each heading use short paragraphs and bullet lists.",
-  "Length: 700 to 1,000 words in total.",
-  "Give concrete, checkable specifics — sizes, ratios, counts, example lines — not general advice.",
-  "Write two example headlines and one example call to action in the business's own voice.",
-  "No preamble, no closing summary, no meta commentary about the task. Start at the first heading.",
+  "Return a complete brand system with concrete, usable values — not advice. Every value must be a real value a designer could apply this afternoon.",
+  "",
+  "Brand foundation: a positioning line, a personality in exactly three words, and three messaging pillars.",
+  "Colour system: a full palette given as named roles with hex values, covering dominant, secondary, accent and neutrals. State the 60/30/10 split and the contrast ratio for body text.",
+  "Typography: a display typeface and a body typeface, each named specifically. A type scale in pixels across five steps, with weights and line heights.",
+  "Spacing and layout: an eight-point scale listed as actual values, plus stated grid and margin rules.",
+  "Logo usage: clear space as a multiple of logo height, a minimum size in pixels, and placement rules.",
+  "Voice and copy: three written example headlines that satisfy the four-to-eight-word rule, one example subhead, and two example calls to action — all specific to this business, never placeholders.",
+  "Dos and don'ts: at least six paired items, drawn from this business's own tone rules and must-avoid fields.",
+  "",
+  "No square brackets. No \"choose a colour that\". No generic advice that would suit any business. Where the profile gives a constraint, honour it exactly.",
+  "Return JSON matching the provided schema.",
 ].join("\n");
 
 /**

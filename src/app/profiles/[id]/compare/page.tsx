@@ -48,6 +48,7 @@ export default async function ComparePage({
       <div className="mt-12">
         <ComparisonPanels
           profileId={row.id}
+          businessName={displayName(row.profile)}
           naivePrompt={buildNaivePrompt(row.profile)}
           model={MODEL}
           profileVersion={row.version}

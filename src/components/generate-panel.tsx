@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { FormattedText } from "@/components/formatted-text";
+import { GeneratedOutput } from "@/components/generated-output";
 
 type Result = {
   text: string;
@@ -11,7 +11,13 @@ type Result = {
 };
 
 /** The generate button and the output it produces. */
-export function GeneratePanel({ profileId }: { profileId: string }) {
+export function GeneratePanel({
+  profileId,
+  businessName,
+}: {
+  profileId: string;
+  businessName: string;
+}) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
@@ -88,7 +94,7 @@ export function GeneratePanel({ profileId }: { profileId: string }) {
             </p>
           </header>
           <div className="mt-6">
-            <FormattedText text={result.text} />
+            <GeneratedOutput text={result.text} businessName={businessName} />
           </div>
         </article>
       ) : null}

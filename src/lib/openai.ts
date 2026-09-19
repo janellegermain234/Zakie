@@ -39,15 +39,34 @@ export type GenerationResult = {
 /**
  * One call, one text back. `instructions` carries the Role component of a
  * CRISP request; the blank-prompt side passes none, because a person typing a
- * one-line prompt does not write themselves a role.
+ * one-line prompt does not write themselves a role. `schema` asks for
+ * structured output, so the renderer can style each part of the answer; the
+ * text comes back exactly as the model wrote it and is stored that way.
  */
 export async function generateText(
   prompt: string,
-  instructions?: string,
+  options: {
+    instructions?: string;
+    schema?: { name: string; schema: Record<string, unknown> };
+  } = {},
 ): Promise<GenerationResult> {
+  const { instructions, schema } = options;
+
   const response = await client().responses.create({
     ...GENERATION_SETTINGS,
     ...(instructions ? { instructions } : {}),
+    ...(schema
+      ? {
+          text: {
+            format: {
+              type: "json_schema" as const,
+              name: schema.name,
+              schema: schema.schema,
+              strict: true,
+            },
+          },
+        }
+      : {}),
     input: prompt,
   });
 
