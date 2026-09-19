@@ -51,6 +51,18 @@ export default async function GeneratePage({
       <div className="mt-10">
         <GeneratePanel profileId={row.id} />
       </div>
+
+      <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-8">
+        <p className="text-sm text-muted">
+          Want to see what the profile is worth?
+        </p>
+        <Link
+          href={`/profiles/${row.id}/compare`}
+          className="text-sm font-medium text-accent transition-opacity hover:opacity-80"
+        >
+          Compare with a blank prompt →
+        </Link>
+      </div>
     </div>
   );
 }
